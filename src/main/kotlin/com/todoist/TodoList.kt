@@ -2,6 +2,9 @@ package com.todoist
 
 import com.todoist.repository.TodoRepository
 import com.todoist.routes.AddTodo
+import com.todoist.routes.ListTodos
+import io.undertow.server.handlers.resource.ClassPathResourceManager
+import org.http4k.contract.ContractRoutingHttpHandler
 import org.http4k.contract.bind
 import org.http4k.contract.contract
 import org.http4k.contract.openapi.ApiInfo
@@ -19,25 +22,34 @@ import org.http4k.routing.static
 import org.http4k.server.Http4kServer
 import org.http4k.server.Undertow
 import org.http4k.server.asServer
+import org.jetbrains.exposed.sql.*
 
-val todoApp =
-    "/todo" bind contract {
-        renderer = OpenApi3(ApiInfo("TodoList API", "v1.0"))
+fun TodoAppRouteHandler(todoRepository: TodoRepository): ContractRoutingHttpHandler {
+    val todoApp =
+        "/todo" bind contract {
+            renderer = OpenApi3(ApiInfo("TodoList API", "v1.0"))
 
-        // Return Swagger API definition under /contract/api/v1/swagger.json
-        descriptionPath = "/swagger.json"
+            // Return Swagger API definition under /contract/api/v1/swagger.json
+            descriptionPath = "/swagger.json"
 
-        // You can use security filter tio protect routes
-        security = ApiKeySecurity(Query.int().required("api"), { it == 42 }) // Allow only requests with &api=42
+            // You can use security filter tio protect routes
+            security = ApiKeySecurity(Query.int().required("api"), { it == 42 }) // Allow only requests with &api=42
 
-        // Add contract routes
-        routes += AddTodo(TodoRepository()).contractRoute()
-    }
+            // Add contract routes
+            routes += AddTodo(todoRepository).contractRoute()
+            routes += ListTodos(todoRepository).contractRoute()
+        }
+    return todoApp
+}
 
 
 fun TodoApp(): HttpHandler {
+    val dbPath = ResourceLoader.Classpath("sample.db")
+    println("dbPath: $dbPath")
+    val database = Database.connect(url = "jdbc:sqlite:sample.db", driver = "org.sqlite.JDBC")
+    val todoRepository = TodoRepository(database)
     val app = routes(
-        todoApp,
+        TodoAppRouteHandler(todoRepository),
         static(ResourceLoader.Classpath("public"))
     )
     return ServerFilters.CatchAll()

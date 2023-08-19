@@ -5,5 +5,5 @@ enum class TodoStatus {
     PENDING
 }
 
-data class TodoItem(val id: Long, val title: String, val description: String, val status: TodoStatus)
+data class TodoItem(val title: String, val description: String, val status: TodoStatus)
 

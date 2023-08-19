@@ -9,9 +9,8 @@ import org.http4k.contract.openapi.OpenAPIJackson.auto
 import org.http4k.core.*
 import org.http4k.core.Status.Companion.OK
 
-data class TodoItemDetails(val title: String, val description: String, val status: TodoStatus)
 
-val todoItemDetailsLens = Body.auto<TodoItemDetails>().toLens()
+val todoItemDetailsLens = Body.auto<TodoItem>().toLens()
 
 class AddTodo(val todoRepository: TodoRepository) {
     private val spec = "/add" meta {
@@ -19,7 +18,7 @@ class AddTodo(val todoRepository: TodoRepository) {
         receiving(todoItemDetailsLens)
         returning(
             OK,
-            todoItemDetailsLens to TodoItemDetails(
+            todoItemDetailsLens to TodoItem(
                 title = "sample",
                 description = "this is a sample todo",
                 status = TodoStatus.PENDING
@@ -29,6 +28,7 @@ class AddTodo(val todoRepository: TodoRepository) {
 
     private val todoHandler: HttpHandler = { request ->
         val todoItem = todoItemDetailsLens(request)
+        todoRepository.addTodoItem(todoItem)
         Response(OK).with(todoItemDetailsLens of todoItem)
     }
 
