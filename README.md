@@ -1,0 +1,7 @@
+# TodoList
+
+## Package
+```
+./gradlew shadowJar
+```
+
