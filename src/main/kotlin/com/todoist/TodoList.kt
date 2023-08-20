@@ -45,8 +45,8 @@ fun TodoAppRouteHandler(todoRepository: TodoRepository): ContractRoutingHttpHand
 }
 
 
-fun TodoApp(): HttpHandler {
-    val appConfig = getWebAppConfig("local")
+fun TodoApp(env: String = System.getenv("KOTLIN_ENV") ?: "local"): HttpHandler {
+    val appConfig = getWebAppConfig(env)
     val dataSource = createDataSource(appConfig)
     val database = Database.connect(dataSource)
     val todoRepository = TodoRepository(database)
@@ -59,4 +59,4 @@ fun TodoApp(): HttpHandler {
         .then(app)
 }
 
-fun TodoAppServer(): Http4kServer = TodoApp().asServer(Undertow(9000))
+fun TodoAppServer(env: String): Http4kServer = TodoApp(env).asServer(Undertow(9090))

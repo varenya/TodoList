@@ -1,5 +1,6 @@
 package com.todoist
 
 fun main() {
-    TodoAppServer().start()
+    val env = System.getenv("KOTLIN_ENV") ?: "local"
+    TodoAppServer(env).start()
 }
