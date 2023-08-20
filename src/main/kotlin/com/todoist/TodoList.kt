@@ -1,6 +1,8 @@
 package com.todoist
 
+import com.todoist.config.getWebAppConfig
 import com.todoist.repository.TodoRepository
+import com.todoist.repository.createDataSource
 import com.todoist.routes.AddTodo
 import com.todoist.routes.ListTodos
 import io.undertow.server.handlers.resource.ClassPathResourceManager
@@ -44,9 +46,9 @@ fun TodoAppRouteHandler(todoRepository: TodoRepository): ContractRoutingHttpHand
 
 
 fun TodoApp(): HttpHandler {
-    val dbPath = ResourceLoader.Classpath("sample.db")
-    println("dbPath: $dbPath")
-    val database = Database.connect(url = "jdbc:sqlite:sample.db", driver = "org.sqlite.JDBC")
+    val appConfig = getWebAppConfig("local")
+    val dataSource = createDataSource(appConfig)
+    val database = Database.connect(dataSource)
     val todoRepository = TodoRepository(database)
     val app = routes(
         TodoAppRouteHandler(todoRepository),

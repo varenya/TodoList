@@ -47,8 +47,10 @@ dependencies {
     implementation("org.http4k:http4k-format-jackson:${http4kVersion}")
     implementation("org.http4k:http4k-server-undertow:${http4kVersion}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
-    implementation("org.xerial:sqlite-jdbc:3.42.0.0")
+    implementation("org.http4k:http4k-cloudnative:${http4kVersion}")
 
+    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation("org.xerial:sqlite-jdbc:3.42.0.0")
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
 

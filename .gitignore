@@ -93,3 +93,5 @@ gradle-app.setting
 
 .kotlintest/
 .vscode
+
+app-local.properties
