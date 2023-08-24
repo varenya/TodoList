@@ -2,13 +2,13 @@ package com.todoist.repository
 
 import com.todoist.formats.TodoItem
 import com.todoist.formats.TodoStatus
-import com.todoist.repository.TodoSchema.description
-import com.todoist.repository.TodoSchema.status
-import com.todoist.repository.TodoSchema.title
+import com.todoist.repository.Todos.description
+import com.todoist.repository.Todos.status
+import com.todoist.repository.Todos.title
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object TodoSchema : Table() {
+object Todos : Table() {
     val id: Column<Int> = integer("id").autoIncrement()
     val title: Column<String> = text("title")
     val description: Column<String> = text("description")
@@ -17,15 +17,10 @@ object TodoSchema : Table() {
 }
 
 class TodoRepository(val database: Database) {
-    init {
-        transaction(database) {
-            SchemaUtils.create(TodoSchema)
-        }
-    }
-
     fun addTodoItem(todoItem: com.todoist.formats.TodoItem) {
         transaction(database) {
-            TodoSchema.insert {
+            addLogger(StdOutSqlLogger)
+            Todos.insert {
                 it[title] = todoItem.title
                 it[description] = todoItem.description
                 it[status] = todoItem.status
@@ -35,7 +30,7 @@ class TodoRepository(val database: Database) {
 
     fun getAllTodos(): List<TodoItem> {
         val todoItems = transaction(database) {
-            TodoSchema.selectAll().map {
+            Todos.selectAll().map {
                 TodoItem(title = it[title], description = it[description], status = it[status])
             }
         }

@@ -2,7 +2,7 @@ package com.todoist
 
 import com.todoist.formats.TodoItem
 import com.todoist.formats.TodoStatus
-import com.todoist.repository.TodoSchema
+import com.todoist.repository.Todos
 import com.todoist.routes.todoItemDetailsLens
 import com.todoist.routes.todoItemsLens
 import io.kotest.core.spec.style.WordSpec
@@ -29,8 +29,8 @@ class TodoListIntegrationTest : WordSpec({
         beforeTest {
             println("resetting database!")
             transaction(database) {
-                SchemaUtils.drop(TodoSchema)
-                SchemaUtils.create(TodoSchema)
+                SchemaUtils.drop(Todos)
+                SchemaUtils.create(Todos)
             }
             server.start()
         }
@@ -66,7 +66,7 @@ class TodoListIntegrationTest : WordSpec({
             val addTodoRequest = Request(Method.POST, "http://localhost:9090/todo/add?api=42").with(
                 todoItemDetailsLens of todoItem
             )
-            val response = client(addTodoRequest)
+            client(addTodoRequest)
 
             val getRequest = Request(Method.GET, "http://localhost:9090/todo?api=42")
             val getResponse = client(getRequest)

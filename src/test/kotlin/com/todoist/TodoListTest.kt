@@ -4,11 +4,10 @@ import com.todoist.config.getWebAppConfig
 import com.todoist.formats.TodoItem
 import com.todoist.formats.TodoStatus
 import com.todoist.repository.TodoRepository
-import com.todoist.repository.TodoSchema
+import com.todoist.repository.Todos
 import com.todoist.repository.createDataSource
 import com.todoist.routes.todoItemDetailsLens
 import com.todoist.routes.todoItemsLens
-import io.kotest.core.spec.BeforeTest
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
@@ -29,6 +28,12 @@ val testDataSource = createDataSource(webConfig)
 
 class TodoListTest : WordSpec({
     val database = Database.connect(testDataSource)
+    beforeTest {
+        transaction(database) {
+            SchemaUtils.drop(Todos)
+            SchemaUtils.create(Todos)
+        }
+    }
     "todo app" should {
         "should get all todos when get method is called" {
             val todoApp = TodoAppRouteHandler(TodoRepository(database))

@@ -12,7 +12,7 @@ buildscript {
 
 apply plugin: "application"
 
-mainClassName = "com.todoist.TodoListKt"
+mainClassName = "com.todoist.MainKt"
 apply plugin: "com.github.johnrengelman.shadow"
 
 shadowJar {
@@ -53,6 +53,9 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.42.0.0")
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
+
+    implementation("org.flywaydb:flyway-core:9.5.1")
+    implementation("org.slf4j:slf4j-nop:1.7.30")
 
     testImplementation("org.http4k:http4k-testing-approval:${http4kVersion}")
     testImplementation("org.http4k:http4k-testing-hamkrest:${http4kVersion}")

@@ -3,9 +3,9 @@ package com.todoist
 import com.todoist.config.getWebAppConfig
 import com.todoist.repository.TodoRepository
 import com.todoist.repository.createDataSource
+import com.todoist.repository.migrateDataSource
 import com.todoist.routes.AddTodo
 import com.todoist.routes.ListTodos
-import io.undertow.server.handlers.resource.ClassPathResourceManager
 import org.http4k.contract.ContractRoutingHttpHandler
 import org.http4k.contract.bind
 import org.http4k.contract.contract
@@ -14,8 +14,13 @@ import org.http4k.contract.openapi.v3.OpenApi3
 import org.http4k.contract.security.ApiKeySecurity
 import org.http4k.core.HttpHandler
 import org.http4k.core.then
+import org.http4k.events.AutoMarshallingEvents
+import org.http4k.events.EventFilters
+import org.http4k.events.Events
+import org.http4k.events.then
 import org.http4k.filter.DebuggingFilters
 import org.http4k.filter.ServerFilters
+import org.http4k.format.Jackson
 import org.http4k.lens.Query
 import org.http4k.lens.int
 import org.http4k.routing.ResourceLoader
@@ -25,6 +30,7 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.Undertow
 import org.http4k.server.asServer
 import org.jetbrains.exposed.sql.*
+import java.time.Clock
 
 fun TodoAppRouteHandler(todoRepository: TodoRepository): ContractRoutingHttpHandler {
     val todoApp =
@@ -45,9 +51,10 @@ fun TodoAppRouteHandler(todoRepository: TodoRepository): ContractRoutingHttpHand
 }
 
 
-fun TodoApp(env: String = System.getenv("KOTLIN_ENV") ?: "local"): HttpHandler {
+fun TodoApp(env: String, clock: Clock, events: Events): HttpHandler {
+
     val appConfig = getWebAppConfig(env)
-    val dataSource = createDataSource(appConfig)
+    val dataSource = createDataSource(appConfig).also(::migrateDataSource)
     val database = Database.connect(dataSource)
     val todoRepository = TodoRepository(database)
     val app = routes(
@@ -59,4 +66,6 @@ fun TodoApp(env: String = System.getenv("KOTLIN_ENV") ?: "local"): HttpHandler {
         .then(app)
 }
 
-fun TodoAppServer(env: String): Http4kServer = TodoApp(env).asServer(Undertow(9090))
+fun TodoAppServer(env: String): Http4kServer =
+    TodoApp(env, Clock.systemDefaultZone(), AutoMarshallingEvents(Jackson))
+        .asServer(Undertow(9090))

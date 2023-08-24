@@ -25,7 +25,7 @@ class ListTodos(val todoRepository: TodoRepository) {
         )
     } bindContract Method.GET
 
-    private val todoListHandler: HttpHandler = { request ->
+    private val todoListHandler: HttpHandler = {
         val todoItems = todoRepository.getAllTodos()
         Response(Status.OK).with(todoItemsLens of todoItems)
     }
